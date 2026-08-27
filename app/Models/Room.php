@@ -14,6 +14,8 @@ class Room extends Model
         'type',
         'status',
         'creator_id',
+        'streak_count',
+        'last_streak_date'
     ];
 
     public function users()
