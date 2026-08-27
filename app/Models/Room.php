@@ -25,4 +25,14 @@ class Room extends Model
     {
         return $this->belongsTo(User::class, 'creator_id');
     }
+
+    public function commitments()
+    {
+        return $this->hasMany(Commitment::class);
+    }
+
+    public function standups()
+    {
+        return $this->hasMany(Standup::class);
+    }
 }

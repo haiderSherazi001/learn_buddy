@@ -15,7 +15,15 @@ class RoomController extends Controller
             abort(403, 'You do not have permission to access this room.');
         }
 
-        $room->load('users');
+        // We load the users, plus the commitments/standups (newest first) and the user who wrote them
+        $room->load([
+            'users', 
+            'commitments' => fn($query) => $query->orderBy('is_completed', 'asc')->latest(),
+            'commitments.user',
+            'standups' => fn($query) => $query->latest(),
+            'standups.user',
+            'standups.comments.user'
+        ]);
 
         return view('rooms.show', compact('room'));
     }
