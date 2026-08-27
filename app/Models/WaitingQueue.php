@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class WaitingQueue extends Model
 {
-    protected $fillable = ['user_id', 'topic'];
+    protected $fillable = ['user_id', 'topic', 'size_preference'];
 }

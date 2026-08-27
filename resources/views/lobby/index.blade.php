@@ -92,13 +92,21 @@
                     
                     <div class="flex flex-wrap gap-3">
                         @foreach($popularTopics as $topic)
-                            <form action="{{ route('queue.join') }}" method="POST">
-                                @csrf
-                                <input type="hidden" name="topic" value="{{ $topic }}">
-                                <button type="submit" class="px-4 py-2 bg-blue-50 text-blue-700 rounded-full font-medium hover:bg-blue-100 transition">
-                                    {{ $topic }}
-                                </button>
-                            </form>
+                        <form action="{{ route('queue.join') }}" method="POST" class="flex flex-col shadow-sm hover:shadow-md transition rounded-lg">
+                            @csrf
+                            <input type="hidden" name="topic" value="{{ $topic }}">
+                            
+                            <!-- The Join Button -->
+                            <button type="submit" class="px-4 py-3 bg-indigo-50 text-indigo-700 rounded-t-lg font-bold hover:bg-indigo-100 transition border-b border-indigo-100">
+                                {{ $topic }}
+                            </button>
+                            
+                            <!-- The Preference Dropdown -->
+                            <select name="size_preference" class="text-xs bg-white border border-gray-200 rounded-b-lg text-gray-600 focus:ring-indigo-500 py-2 text-center cursor-pointer outline-none">
+                                <option value="duo">1-on-1 Buddy</option>
+                                <option value="group">Group (Max 4)</option>
+                            </select>
+                        </form>
                         @endforeach
                     </div>
                 </div>
