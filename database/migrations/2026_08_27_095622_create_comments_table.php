@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('standups', function (Blueprint $table) {
+        Schema::create('comments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('room_id')->constrained()->cascadeOnDelete();
-            $table->text('what_i_did'); // e.g., "Learned about Eloquent relationships."
-            $table->text('blockers')->nullable(); // e.g., "Stuck on pivot tables."
+            $table->foreignId('standup_id')->constrained()->cascadeOnDelete(); // Links to the specific standup
+            $table->text('body'); 
             $table->timestamps();
         });
     }
@@ -26,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('standups');
+        Schema::dropIfExists('comments');
     }
 };
