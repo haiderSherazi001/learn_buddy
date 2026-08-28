@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Room;
 use App\Models\Commitment;
+use App\Models\RoomEvent;
 
 class CommitmentController extends Controller
 {
@@ -35,6 +36,14 @@ class CommitmentController extends Controller
         $commitment->update([
             'is_completed' => !$commitment->is_completed
         ]);
+
+        if ($commitment->is_completed) {
+            RoomEvent::create([
+                'room_id' => $commitment->room_id,
+                'message' => '🎯 ' . auth()->user()->name . ' completed a weekly commitment!',
+                'type' => 'success'
+            ]);
+        }
 
         return back()->with('success', 'Commitment status updated!');
     }

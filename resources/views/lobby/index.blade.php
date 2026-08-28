@@ -26,6 +26,29 @@
                 <p class="text-gray-600 mt-2">Join a queue for popular topics or create a custom room.</p>
             </div>
 
+            <!-- CREATE CUSTOM ROOM SECTION -->
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-8 border border-gray-200">
+                <div class="p-6 bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-gray-200">
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">✨ Create a Custom Room</h3>
+                    <p class="text-sm text-gray-600 mb-4">Studying with friends? Create a private room and share the invite link.</p>
+                    
+                    <form action="{{ route('rooms.store') }}" method="POST" class="flex flex-col md:flex-row gap-4 items-end">
+                        @csrf
+                        <div class="flex-1 w-full">
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Room Name</label>
+                            <input type="text" name="title" placeholder="e.g., University Finals Prep" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        </div>
+                        <div class="w-full md:w-32">
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Max Users</label>
+                            <input type="number" name="max_capacity" value="4" min="2" max="10" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        </div>
+                        <button type="submit" class="w-full md:w-auto px-6 py-2.5 bg-indigo-600 text-white font-bold rounded-md hover:bg-indigo-700 transition shadow-sm">
+                            Create Room
+                        </button>
+                    </form>
+                </div>
+            </div>
+
             <!-- MY ACTIVE ROOMS SECTION -->
             @if($myRooms->count() > 0)
                 <div class="mb-10">

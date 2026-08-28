@@ -21,6 +21,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::post('/rooms/custom', [App\Http\Controllers\RoomController::class, 'store'])->name('rooms.store');
+    Route::get('/join/{invite_code}', [App\Http\Controllers\RoomController::class, 'joinViaInvite'])->name('rooms.join');
 });
 Route::get('/lobby', [LobbyController::class, 'index'])
     ->middleware(['auth', 'verified'])

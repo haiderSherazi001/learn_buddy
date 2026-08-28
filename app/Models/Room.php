@@ -9,8 +9,9 @@ class Room extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'type', 'status', 'creator_id', 'streak_count', 'last_streak_date', 'max_capacity'];
-
+    protected $fillable = [
+        'title', 'type', 'status', 'creator_id', 'streak_count', 'last_streak_date', 'max_capacity', 'invite_code'
+    ];
     public function users()
     {
         return $this->belongsToMany(User::class);
@@ -34,5 +35,10 @@ class Room extends Model
     public function resources()
     {
         return $this->hasMany(Resource::class);
+    }
+
+    public function events()
+    {
+        return $this->hasMany(RoomEvent::class);
     }
 }
