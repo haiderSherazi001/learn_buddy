@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\WaitingQueue;
 use App\Models\Room;
+use App\Models\RoomEvent;
 
 class QueueController extends Controller
 {
@@ -29,28 +30,35 @@ class QueueController extends Controller
             return redirect()->route('lobby')->with('info', "You are already in an active {$topic} room!");
         }
 
-        // 2. GROUP FEATURE: Is there an existing open Group room they can instantly join?
-        if ($pref === 'group') {
-            // Find active group rooms for this topic
-            $activeGroupRooms = Room::where('title', $topic . ' Cohort')
-                ->where('status', 'active')
-                ->where('max_capacity', 4)
-                ->withCount('users') 
-                ->get();
+        // 2. REFILL FEATURE: Is there an existing open room they can instantly join?
+        $targetCapacity = $pref === 'group' ? 4 : 2;
 
-            // Find the first one that has less than 4 people
-            $openRoom = $activeGroupRooms->where('users_count', '<', 4)->first();
+        $activeRooms = Room::where('title', $topic . ' Cohort')
+            ->where('status', 'active')
+            ->where('type', 'template')
+            ->where('max_capacity', $targetCapacity)
+            ->withCount('users') 
+            ->get();
 
-            if ($openRoom) {
-                // Instantly add them to the room!
-                $openRoom->users()->attach($user->id);
-                
-                // Remove them from any queues just in case
-                WaitingQueue::where('user_id', $user->id)->delete();
-                
-                return redirect()->route('rooms.show', $openRoom->id)
-                    ->with('success', "You instantly joined an active {$topic} group!");
-            }
+        // Find the first one that has an empty slot
+        $openRoom = $activeRooms->where('users_count', '<', $targetCapacity)->first();
+
+        if ($openRoom) {
+            // Instantly add them to the room!
+            $openRoom->users()->attach($user->id);
+            
+            // Generate a join notification!
+            RoomEvent::create([
+                'room_id' => $openRoom->id,
+                'message' => $user->name . ' joined the cohort!',
+                'type' => 'join'
+            ]);
+            
+            // Remove them from any queues just in case
+            WaitingQueue::where('user_id', $user->id)->delete();
+            
+            return redirect()->route('rooms.show', $openRoom->id)
+                ->with('success', "You instantly joined an active {$topic} room!");
         }
 
         // 3. Handle existing queue entries
@@ -87,6 +95,13 @@ class QueueController extends Controller
 
             // Attach BOTH users to the room 
             $room->users()->attach([$user->id, $buddy->user_id]);
+            
+            // Generate a welcome notification!
+            RoomEvent::create([
+                'room_id' => $room->id,
+                'message' => 'Cohort created! Welcome to the group.',
+                'type' => 'info'
+            ]);
 
             // Remove both users from the queue
             WaitingQueue::whereIn('user_id', [$user->id, $buddy->user_id])->delete();

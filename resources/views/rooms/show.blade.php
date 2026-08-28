@@ -73,7 +73,12 @@
                                     <!-- The Goal Text -->
                                     <div>
                                         <div class="flex items-center space-x-2 mb-2">
-                                            <span class="font-bold text-gray-900">{{ $commitment->user->name }}</span>
+                                            <span class="font-bold text-gray-900">
+                                                {{ $commitment->user->name }}
+                                                @if(!$room->users->contains($commitment->user_id))
+                                                    <span class="text-red-400 text-xs italic font-normal ml-1">(Left Cohort)</span>
+                                                @endif
+                                            </span>
                                             <span class="text-xs text-gray-400">{{ $commitment->created_at->diffForHumans() }}</span>
                                         </div>
                                         <p class="{{ $commitment->is_completed ? 'text-gray-500 line-through' : 'text-gray-700' }}">
@@ -129,7 +134,12 @@
                             <div class="p-4 bg-white border rounded-lg shadow-sm">
                                 <!-- Original Standup Content -->
                                 <div class="flex items-center space-x-2 mb-2">
-                                    <span class="font-bold text-gray-900">{{ $standup->user->name }}</span>
+                                    <span class="font-bold text-gray-900">
+                                        {{ $standup->user->name }}
+                                        @if(!$room->users->contains($standup->user_id))
+                                            <span class="text-red-400 text-xs italic font-normal ml-1">(Left Cohort)</span>
+                                        @endif
+                                    </span>
                                     <span class="text-xs text-gray-400">{{ $standup->created_at->diffForHumans() }}</span>
                                 </div>
                                 <p class="text-gray-700"><strong>Progress:</strong> {{ $standup->what_i_did }}</p>
@@ -143,7 +153,13 @@
                                     <!-- List existing comments -->
                                     @foreach($standup->comments as $comment)
                                         <div class="mb-3">
-                                            <p class="text-xs text-gray-500 font-bold mb-1">{{ $comment->user->name }} <span class="font-normal text-gray-400">&bull; {{ $comment->created_at->diffForHumans() }}</span></p>
+                                            <p class="text-xs text-gray-500 font-bold mb-1">
+                                                {{ $comment->user->name }} 
+                                                @if(!$room->users->contains($comment->user_id))
+                                                    <span class="text-red-400 font-normal italic mr-1">(Left Cohort)</span>
+                                                @endif
+                                                <span class="font-normal text-gray-400">&bull; {{ $comment->created_at->diffForHumans() }}</span>
+                                            </p>
                                             <p class="text-sm text-gray-700 bg-gray-50 p-2 rounded-lg inline-block">{{ $comment->body }}</p>
                                         </div>
                                     @endforeach
@@ -164,77 +180,100 @@
 
                 </div>
 
-                <!-- RIGHT SIDEBAR: STUDY BUDDIES -->
+                <!-- RIGHT SIDEBAR: STUDY BUDDIES, ACTIVITY, RESOURCES -->
                 <div class="md:col-span-1 space-y-6">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 self-start">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Cohort Members</h3>
-                    <ul class="space-y-3">
-                        @foreach($room->users as $member)
-                            <li class="flex items-center space-x-3">
-                                <!-- Dummy Avatar -->
-                                <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold">
-                                    {{ strtoupper(substr($member->name, 0, 1)) }}
+                    
+                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 self-start">
+                        <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Cohort Members</h3>
+                        <ul class="space-y-3">
+                            @foreach($room->users as $member)
+                                <li class="flex items-center space-x-3">
+                                    <!-- Dummy Avatar -->
+                                    <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold">
+                                        {{ strtoupper(substr($member->name, 0, 1)) }}
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">
+                                            {{ $member->name }}
+                                            @if($member->id === auth()->id())
+                                                <span class="text-xs text-gray-400 font-normal">(You)</span>
+                                            @endif
+                                        </p>
+                                    </div>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+
+                    <!-- 🔔 ACTIVITY LOG -->
+                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border-t-4 border-blue-400 p-6">
+                        <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Activity Log</h3>
+                        <ul class="space-y-3 max-h-48 overflow-y-auto">
+                            @forelse($room->events as $event)
+                                <li class="text-sm border-l-2 pl-3 py-1 {{ $event->type === 'leave' ? 'border-red-400 text-red-700 bg-red-50' : 'border-blue-400 text-blue-700 bg-blue-50' }} rounded-r">
+                                    <span class="block font-medium">{{ $event->message }}</span>
+                                    <span class="text-xs opacity-75">{{ $event->created_at->diffForHumans() }}</span>
+                                </li>
+                            @empty
+                                <p class="text-xs text-gray-500 italic">No recent activity.</p>
+                            @endforelse
+                        </ul>
+                    </div>
+
+                    <!-- 📚 RESOURCE STASH -->
+                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border-t-4 border-yellow-400">
+                        <div class="p-6 border-b border-gray-200 bg-gray-50">
+                            <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                📚 Resource Stash
+                            </h3>
+                            
+                            <!-- Add Resource Form -->
+                            <form action="{{ route('resources.store', $room->id) }}" method="POST" class="mt-4 space-y-3">
+                                @csrf
+                                <div>
+                                    <input type="text" name="title" placeholder="Title (e.g., Laravel Docs)" required class="w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    @error('title') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                                 </div>
                                 <div>
-                                    <p class="text-sm font-medium text-gray-900">
-                                        {{ $member->name }}
-                                        @if($member->id === auth()->id())
-                                            <span class="text-xs text-gray-400 font-normal">(You)</span>
-                                        @endif
-                                    </p>
+                                    <input type="url" name="url" placeholder="https://..." required class="w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    @error('url') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                                 </div>
-                            </li>
-                        @endforeach
-                    </ul>
-                </div>
+                                <button type="submit" class="w-full px-4 py-2 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-md font-bold hover:bg-yellow-100 transition text-sm">
+                                    Save Link
+                                </button>
+                            </form>
+                        </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border-t-4 border-yellow-400">
-                    <div class="p-6 border-b border-gray-200 bg-gray-50">
-                        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-                            📚 Resource Stash
-                        </h3>
-                        
-                        <!-- Add Resource Form -->
-                        <form action="{{ route('resources.store', $room->id) }}" method="POST" class="mt-4 space-y-3">
-                            @csrf
-                            <div>
-                                <input type="text" name="title" placeholder="Title (e.g., Laravel Docs)" required class="w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                @error('title') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                            </div>
-                            <div>
-                                <input type="url" name="url" placeholder="https://..." required class="w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                @error('url') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                            </div>
-                            <button type="submit" class="w-full px-4 py-2 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-md font-bold hover:bg-yellow-100 transition text-sm">
-                                Save Link
-                            </button>
-                        </form>
+                        <!-- Resource List -->
+                        <div class="p-6 space-y-3 max-h-96 overflow-y-auto">
+                            @forelse($room->resources as $resource)
+                                <div class="p-3 bg-gray-50 border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition">
+                                    <!-- target="_blank" ensures it opens in a new tab so they don't lose the room -->
+                                    <a href="{{ $resource->url }}" target="_blank" rel="noopener noreferrer" class="font-bold text-indigo-600 hover:text-indigo-800 hover:underline text-sm block truncate">
+                                        🔗 {{ $resource->title }}
+                                    </a>
+                                    <div class="text-xs text-gray-500 mt-2 flex justify-between items-center">
+                                        <span>
+                                            By {{ $resource->user->name }}
+                                            @if(!$room->users->contains($resource->user_id))
+                                                <span class="text-red-400 italic">(Left)</span>
+                                            @endif
+                                        </span>
+                                        <span>{{ $resource->created_at->diffForHumans() }}</span>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="text-center py-4">
+                                    <p class="text-gray-500 italic text-sm">No resources shared yet.</p>
+                                    <p class="text-xs text-gray-400 mt-1">Drop a helpful YouTube link or tutorial here!</p>
+                                </div>
+                            @endforelse
+                        </div>
                     </div>
 
-                    <!-- Resource List -->
-                    <div class="p-6 space-y-3 max-h-96 overflow-y-auto">
-                        @forelse($room->resources as $resource)
-                            <div class="p-3 bg-gray-50 border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition">
-                                <!-- target="_blank" ensures it opens in a new tab so they don't lose the room -->
-                                <a href="{{ $resource->url }}" target="_blank" rel="noopener noreferrer" class="font-bold text-indigo-600 hover:text-indigo-800 hover:underline text-sm block truncate">
-                                    🔗 {{ $resource->title }}
-                                </a>
-                                <div class="text-xs text-gray-500 mt-2 flex justify-between items-center">
-                                    <span>By {{ $resource->user->name }}</span>
-                                    <span>{{ $resource->created_at->diffForHumans() }}</span>
-                                </div>
-                            </div>
-                        @empty
-                            <div class="text-center py-4">
-                                <p class="text-gray-500 italic text-sm">No resources shared yet.</p>
-                                <p class="text-xs text-gray-400 mt-1">Drop a helpful YouTube link or tutorial here!</p>
-                            </div>
-                        @endforelse
-                    </div>
-                </div>
-            </div>
+                </div> <!-- Ends right sidebar wrapper -->
+            </div> <!-- Ends grid -->
 
-            </div>
         </div>
     </div>
 </x-app-layout>

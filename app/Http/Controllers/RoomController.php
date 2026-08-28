@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\Room;
+use App\Models\RoomEvent;
 
 class RoomController extends Controller
 {
@@ -24,8 +25,9 @@ class RoomController extends Controller
             'standups' => fn($query) => $query->latest(),
             'standups.user',
             'standups.comments.user',
-            'resources' => fn($query) => $query->latest(), 
-            'resources.user'
+            'resources' => fn($query) => $query->latest(),
+            'resources.user',
+            'events' => fn($query) => $query->latest() 
         ]);
 
         return view('rooms.show', compact('room'));
@@ -35,13 +37,22 @@ class RoomController extends Controller
     {
         $user = auth()->user();
 
+        // 1. Remove the user from the room
         $room->users()->detach($user->id);
 
+        // 2. Generate the System Notification
+        RoomEvent::create([
+            'room_id' => $room->id,
+            'message' => $user->name . ' has left the cohort.',
+            'type' => 'leave'
+        ]);
+
+        // 3. (Optional but good) If the room is now completely empty, we can just delete it
         if ($room->users()->count() === 0) {
             $room->delete();
         }
 
-        return redirect()->route('lobby')->with('success', 'You have successfully left the room.');
+        return redirect()->route('lobby')->with('success', 'You have left the room.');
     }
 
     // Store a new custom room

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Room;
 use App\Models\Resource;
+use App\Models\RoomEvent;
 
 class ResourceController extends Controller
 {
@@ -27,6 +28,12 @@ class ResourceController extends Controller
             'room_id' => $room->id,
             'title' => $request->title,
             'url' => $request->url,
+        ]);
+
+        RoomEvent::create([
+            'room_id' => $room->id,
+            'message' => '📚 ' . auth()->user()->name . ' shared a new resource: ' . $request->title,
+            'type' => 'info'
         ]);
 
         return back()->with('success', 'Resource added to the stash!');

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Room;
 use App\Models\Standup;
+use App\Models\RoomEvent; // Make sure to import this!
 use Carbon\Carbon;
 
 class StandupController extends Controller
@@ -43,6 +44,16 @@ class StandupController extends Controller
 
                 $room->last_streak_date = $today;
                 $room->save();
+
+                // 🏆 NEW: Check for Milestones!
+                $milestones = [3, 7, 14, 30, 50, 100];
+                if (in_array($room->streak_count, $milestones)) {
+                    RoomEvent::create([
+                        'room_id' => $room->id,
+                        'message' => '🔥 Amazing! The cohort just hit a ' . $room->streak_count . '-Day Streak!',
+                        'type' => 'success'
+                    ]);
+                }
 
                 return back()->with('success', 'Daily standup logged! 🔥 Cohort Streak Increased!');
             }
