@@ -9,8 +9,9 @@ class Room extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'type', 'status', 'creator_id', 'streak_count', 'last_streak_date', 'max_capacity'];
-
+    protected $fillable = [
+        'title', 'type', 'status', 'creator_id', 'streak_count', 'last_streak_date', 'max_capacity', 'invite_code'
+    ];
     public function users()
     {
         return $this->belongsToMany(User::class);

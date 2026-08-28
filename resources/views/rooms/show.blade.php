@@ -8,6 +8,7 @@
                     {{ $room->title }}
                 </h2>
                 
+                <!-- STREAK LOGIC -->
                 @if($room->streak_count > 0)
                     <div class="px-3 py-1 bg-orange-100 border border-orange-300 text-orange-700 font-bold rounded-full text-sm flex items-center shadow-sm">
                         🔥 {{ $room->streak_count }} Day Streak
@@ -17,6 +18,14 @@
                         🧊 No active streak
                     </div>
                 @endif
+            
+                <!-- THE INVITE LINK (Completely independent of the streak) -->
+                @if($room->type === 'custom' && $room->invite_code)
+                    <div class="px-3 py-1 bg-blue-50 border border-blue-200 text-blue-700 rounded text-sm flex items-center space-x-2 shadow-sm">
+                        <span class="font-bold">Invite Link:</span>
+                        <code class="bg-white px-2 py-0.5 rounded text-xs select-all">{{ url('/join/' . $room->invite_code) }}</code>
+                    </div>
+                @endif 
             </div>
             
             <!-- THE LEAVE ROOM BUTTON -->
