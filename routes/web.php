@@ -8,6 +8,7 @@ use App\Http\Controllers\RoomController;
 use App\Http\Controllers\CommitmentController;
 use App\Http\Controllers\StandupController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\ResourceController;
 
 
 Route::get('/', function () {
@@ -32,5 +33,6 @@ Route::post('/rooms/{room}/commitments', [CommitmentController::class, 'store'])
 Route::patch('/commitments/{commitment}/toggle', [CommitmentController::class, 'toggle'])->name('commitments.toggle');
 Route::post('/rooms/{room}/standups', [StandupController::class, 'store'])->name('standups.store');
 Route::post('/standups/{standup}/comments', [CommentController::class, 'store'])->name('comments.store');
+Route::post('/rooms/{room}/resources', [ResourceController::class, 'store'])->name('resources.store');
 
 require __DIR__.'/auth.php';

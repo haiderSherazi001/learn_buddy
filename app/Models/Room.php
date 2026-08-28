@@ -30,4 +30,9 @@ class Room extends Model
     {
         return $this->hasMany(Standup::class);
     }
+    
+    public function resources()
+    {
+        return $this->hasMany(Resource::class);
+    }
 }
