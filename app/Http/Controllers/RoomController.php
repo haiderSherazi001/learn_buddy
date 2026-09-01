@@ -27,7 +27,9 @@ class RoomController extends Controller
             'standups.comments.user',
             'resources' => fn($query) => $query->latest(),
             'resources.user',
-            'events' => fn($query) => $query->latest() 
+            'events' => fn($query) => $query->latest(),
+            'messages' => fn($query) => $query->oldest(), 
+            'messages.user'
         ]);
 
         return view('rooms.show', compact('room'));
