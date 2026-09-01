@@ -41,4 +41,9 @@ class Room extends Model
     {
         return $this->hasMany(RoomEvent::class);
     }
+
+    public function messages()
+    {
+        return $this->hasMany(Message::class);
+    }
 }
