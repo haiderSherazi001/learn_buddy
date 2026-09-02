@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\WaitingQueue;
 use App\Models\Room;
 use App\Models\RoomEvent;
+use App\Events\MatchFound;
 
 class QueueController extends Controller
 {
@@ -85,7 +86,6 @@ class QueueController extends Controller
                     ->first();
 
         if ($buddy) {
-            // MATCH FOUND! Create the new Room
             $room = Room::create([
                 'title' => $topic . ' Cohort',
                 'type' => 'template',
@@ -106,7 +106,9 @@ class QueueController extends Controller
             // Remove both users from the queue
             WaitingQueue::whereIn('user_id', [$user->id, $buddy->user_id])->delete();
 
-            return redirect()->route('lobby')->with('success', 'Match found! Your ' . $topic . ' room was created.');
+            MatchFound::dispatch($buddy->user_id, $room->id);
+
+            return redirect()->route('rooms.show', $room->id)->with('success', 'Match found! Your ' . $topic . ' room was created.');
         }
 
         return redirect()->route('lobby')->with('info', "Joined the {$topic} queue. Waiting for a {$pref} buddy...");

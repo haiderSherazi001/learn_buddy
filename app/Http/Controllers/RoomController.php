@@ -71,11 +71,16 @@ class RoomController extends Controller
             'status' => 'active',
             'creator_id' => auth()->id(),
             'max_capacity' => $request->max_capacity,
-            'invite_code' => Str::random(8), // Generates something like 'aB3dE9xQ'
+            'invite_code' => Str::random(8),
         ]);
 
-        // Attach the creator to the room
         $room->users()->attach(auth()->id());
+
+        RoomEvent::create([
+        'room_id' => $room->id,
+        'message' => auth()->user()->name . ' joined the cohort!',
+        'type' => 'info'
+    ]);
 
         return redirect()->route('rooms.show', $room->id)->with('success', 'Custom room created! Share your invite link.');
     }

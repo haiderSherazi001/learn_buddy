@@ -4,6 +4,10 @@
             
             <!-- Left Side: Title & Streak Badge -->
             <div class="flex items-center space-x-4">
+                <a href="{{ route('lobby') }}" class="text-sm px-3 py-1.5 bg-gray-100 border border-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition shadow-sm flex items-center gap-2">
+                    <span>&larr;</span> Lobby
+                </a>
+                
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                     {{ $room->title }}
                 </h2>
