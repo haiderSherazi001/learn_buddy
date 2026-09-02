@@ -17,7 +17,7 @@ class StandupController extends Controller
             'blockers' => 'nullable|string',
         ]);
 
-        Standup::create([
+        $standup = Standup::create([
             'user_id' => auth()->id(),
             'room_id' => $room->id,
             'what_i_did' => $request->what_i_did,
@@ -53,17 +53,28 @@ class StandupController extends Controller
                         'type' => 'success'
                     ]);
                 }
-
-                return back()->with('success', 'Daily standup logged! 🔥 Cohort Streak Increased!');
+            } else {
+                RoomEvent::create([
+                    'room_id' => $room->id,
+                    'message' => auth()->user()->name . ' logged their daily standup.',
+                    'type' => 'info'
+                ]);
             }
-        }
-
-        RoomEvent::create([
+        } else {
+            RoomEvent::create([
                 'room_id' => $room->id,
                 'message' => auth()->user()->name . ' logged their daily standup.',
                 'type' => 'info'
-                ]);
+            ]);
+        }
 
-        return back()->with('success', 'Daily standup logged!');
+        $standup->load('user'); 
+
+        broadcast(new \App\Events\StandupCreated($standup))->toOthers();
+
+        return response()->json([
+            'standup' => $standup,
+            'message' => 'Daily standup logged!'
+        ]);
     }
 }

@@ -11,7 +11,7 @@
         @error('goal') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
     </div>
     
-    <div class="p-6 space-y-4" id="commitments-list">
+    <div class="p-6 space-y-4 max-h-[400px] overflow-y-auto scrollable-panel" id="commitments-list">
         @forelse($room->commitments as $commitment)
         <div class="commitment-item p-4 border rounded-lg shadow-sm transition {{ $commitment->is_completed ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-300' }}" data-id="{{ $commitment->id }}">
             <div class="flex justify-between items-start">
