@@ -46,6 +46,8 @@ class StandupController extends Controller
                 $room->save();
 
                 broadcast(new \App\Events\RoomUpdated($room));
+                broadcast(new \App\Events\CohortMembersUpdated($room));
+                broadcast(new \App\Events\RoomHeaderUpdated($room));
 
                 $milestones = [3, 7, 14, 30, 50, 100];
                 if (in_array($room->streak_count, $milestones)) {

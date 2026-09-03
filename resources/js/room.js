@@ -6,6 +6,7 @@ import { initStandups } from './room/standups';
 import { initResources } from './room/resources';
 import { initChatAndActivity } from './room/chat';
 import { initMembers } from './room/members';
+import { initHeader } from './room/header';
 
 document.addEventListener('DOMContentLoaded', () => {
     const roomData = document.getElementById('room-data');
@@ -23,4 +24,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initResources(currentUserId, roomChannel);
     initChatAndActivity(currentUserId, roomChannel);
     initMembers(roomChannel);
+    initHeader(roomChannel);
 });

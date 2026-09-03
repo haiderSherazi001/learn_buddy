@@ -1,7 +1,7 @@
 @props(['room'])
 
 <!-- ⚡ NEW: Fixed height (400px) and flex layout so the input sticks to the bottom -->
-<div class="bg-white overflow-hidden shadow-sm sm:rounded-lg flex flex-col h-[400px]">
+<div class="bg-white overflow-hidden shadow-sm sm:rounded-lg flex flex-col h-[600px]">
     
     <div class="p-4 border-b border-gray-200 bg-gray-50">
         <h3 class="text-md font-bold text-gray-900 flex items-center gap-2">

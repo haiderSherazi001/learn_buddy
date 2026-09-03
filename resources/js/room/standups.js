@@ -32,6 +32,58 @@ export function initStandups(currentUserId, roomChannel) {
              .catch(error => console.error(error));
     });
 
+    // 4. View More / View Less Logic (Event Delegation)
+    standupsList.addEventListener('click', function(e) {
+        
+        // --- VIEW MORE ---
+        if (e.target.matches('button.view-more-btn')) {
+            const btn = e.target;
+            const standupId = btn.dataset.id;
+            const commentsList = document.getElementById(`comments-list-${standupId}`);
+            const controlsContainer = btn.closest('.reply-controls');
+            const viewLessBtn = controlsContainer.querySelector('.view-less-btn');
+
+            if (commentsList) {
+                const hiddenReplies = Array.from(commentsList.querySelectorAll('.extra-reply.hidden'));
+                
+                const toReveal = hiddenReplies.slice(0, 3);
+                toReveal.forEach(reply => reply.classList.remove('hidden'));
+
+                const remaining = hiddenReplies.length - toReveal.length;
+                
+                if (remaining > 0) {
+                    btn.innerText = `View more`;
+                } else {
+                    btn.classList.add('hidden');
+                }
+                
+                viewLessBtn.classList.remove('hidden');
+            }
+        }
+
+        // --- VIEW LESS ---
+        if (e.target.matches('button.view-less-btn')) {
+            const btn = e.target;
+            const standupId = btn.dataset.id;
+            const commentsList = document.getElementById(`comments-list-${standupId}`);
+            const controlsContainer = btn.closest('.reply-controls');
+            const viewMoreBtn = controlsContainer.querySelector('.view-more-btn');
+
+            if (commentsList) {
+                const allReplies = Array.from(commentsList.children);
+                
+                const toHide = allReplies.slice(2);
+                toHide.forEach(reply => {
+                    reply.classList.add('hidden', 'extra-reply');
+                });
+
+                btn.classList.add('hidden');
+                viewMoreBtn.classList.remove('hidden');
+                viewMoreBtn.innerText = `View more`;
+            }
+        }
+    });
+
     // 3. Submit Reply (Event Delegation)
     standupsList.addEventListener('submit', function(e) {
         if (e.target.matches('form.reply-form')) {

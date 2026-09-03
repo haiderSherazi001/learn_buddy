@@ -30,6 +30,13 @@ export function initChatAndActivity(currentUserId, roomChannel) {
                 </li>
             `;
             activityLog.insertAdjacentHTML('afterbegin', html);
+
+            const activityTab = document.getElementById('tab-activity');
+            const badge = document.getElementById('activity-badge');
+            
+            if (activityTab && activityTab.classList.contains('hidden') && badge) {
+                badge.classList.remove('hidden');
+            }
         });
 
     // Chat form submit

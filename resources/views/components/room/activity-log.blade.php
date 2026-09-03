@@ -1,14 +1,15 @@
 @props(['room'])
 
-<div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border-t-4 border-indigo-500">
+<!-- ⚡ CHANGED: Added flex, flex-col, and h-[600px] to match the other tabs -->
+<div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border-t-4 border-indigo-500 flex flex-col h-[600px]">
     <div class="p-4 border-b border-gray-200 bg-gray-50 flex items-center gap-2">
         <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
         <h3 class="text-md font-bold text-gray-900">Activity Log</h3>
     </div>
     
-    <ul id="activity-log" class="p-4 space-y-3 h-[250px] overflow-y-auto scrollable-panel">
+    <!-- ⚡ CHANGED: Replaced h-[250px] with flex-1 so it takes up all remaining height nicely -->
+    <ul id="activity-log" class="flex-1 p-4 space-y-3 overflow-y-auto scrollable-panel bg-white">
         
-        <!-- Assuming you grab the latest 50 events -->
         @forelse($room->events()->latest()->take(50)->get() as $event)
             @php
                 $colorClass = $event->type === 'leave' || $event->type === 'error'
@@ -20,7 +21,7 @@
                 <span class="text-xs opacity-75">{{ $event->created_at->diffForHumans() }}</span>
             </li>
         @empty
-            <li class="text-sm text-gray-500 italic empty-log">No activity yet.</li>
+            <li class="text-sm text-gray-500 italic empty-log text-center mt-4">No activity yet.</li>
         @endforelse
     </ul>
 </div>

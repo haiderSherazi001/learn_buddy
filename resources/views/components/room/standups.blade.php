@@ -36,10 +36,11 @@
 
             <div class="mt-4 pt-4 border-t border-gray-100 pl-4 border-l-2 border-indigo-100">
                 
-                <!-- Comments list (Removed inner scrollbar for better UX) -->
-                <div class="comments-list">
+                <!-- ⚡ ADDED ID to this container -->
+                <div class="comments-list" id="comments-list-{{ $standup->id }}">
                     @foreach($standup->comments as $comment)
-                        <div class="mb-3">
+                        <!-- ⚡ HIDE comments after the first 2 -->
+                        <div class="mb-3 {{ $loop->index >= 2 ? 'hidden extra-reply' : '' }}">
                             <p class="text-xs text-gray-500 font-bold mb-1">
                                 {{ $comment->user->name }} 
                                 @if(!$room->users->contains($comment->user_id))
@@ -52,7 +53,21 @@
                     @endforeach
                 </div>
 
-                <!-- Fully Restored Reply Form -->
+               <!-- ⚡ The View More / View Less Controls -->
+                @if($standup->comments->count() > 2)
+                    <div class="flex items-center gap-4 mb-3 reply-controls" data-id="{{ $standup->id }}">
+                        
+                        <button type="button" class="text-xs text-indigo-500 hover:text-indigo-700 font-bold view-more-btn transition" data-id="{{ $standup->id }}">
+                            View more
+                        </button>
+                        
+                        <button type="button" class="text-xs text-gray-400 hover:text-gray-600 font-bold view-less-btn transition hidden" data-id="{{ $standup->id }}">
+                            View less
+                        </button>
+                        
+                    </div>
+                @endif
+
                 <form action="{{ route('comments.store', $standup->id) }}" method="POST" class="reply-form mt-3 flex gap-2" data-id="{{ $standup->id }}">
                     @csrf
                     <input type="text" name="body" placeholder="Reply or help unblock..." required autocomplete="off" class="reply-input text-sm flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-1 px-3">
