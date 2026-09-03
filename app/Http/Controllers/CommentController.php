@@ -18,12 +18,19 @@ class CommentController extends Controller
             abort(403, 'You cannot comment in this room.');
         }
 
-        Comment::create([
+        $comment = Comment::create([
             'user_id' => auth()->id(),
             'standup_id' => $standup->id,
             'body' => $request->body,
         ]);
 
-        return back()->with('success', 'Reply posted!');
+        // ⚡ NEW: Broadcast the reply!
+        broadcast(new \App\Events\StandupReplyCreated($comment, $standup->room_id))->toOthers();
+
+        // ⚡ NEW: Return JSON
+        return response()->json([
+            'comment' => $comment->load('user'),
+            'standup_id' => $standup->id
+        ]);
     }
 }

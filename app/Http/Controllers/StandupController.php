@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Room;
 use App\Models\Standup;
-use App\Models\RoomEvent; // Make sure to import this!
+use App\Models\RoomEvent;
 use Carbon\Carbon;
 
 class StandupController extends Controller
@@ -17,7 +17,7 @@ class StandupController extends Controller
             'blockers' => 'nullable|string',
         ]);
 
-        Standup::create([
+        $standup = Standup::create([
             'user_id' => auth()->id(),
             'room_id' => $room->id,
             'what_i_did' => $request->what_i_did,
@@ -45,7 +45,10 @@ class StandupController extends Controller
                 $room->last_streak_date = $today;
                 $room->save();
 
-                // 🏆 NEW: Check for Milestones!
+                broadcast(new \App\Events\RoomUpdated($room));
+                broadcast(new \App\Events\CohortMembersUpdated($room));
+                broadcast(new \App\Events\RoomHeaderUpdated($room));
+
                 $milestones = [3, 7, 14, 30, 50, 100];
                 if (in_array($room->streak_count, $milestones)) {
                     RoomEvent::create([
@@ -54,11 +57,28 @@ class StandupController extends Controller
                         'type' => 'success'
                     ]);
                 }
-
-                return back()->with('success', 'Daily standup logged! 🔥 Cohort Streak Increased!');
+            } else {
+                RoomEvent::create([
+                    'room_id' => $room->id,
+                    'message' => auth()->user()->name . ' logged their daily standup.',
+                    'type' => 'info'
+                ]);
             }
+        } else {
+            RoomEvent::create([
+                'room_id' => $room->id,
+                'message' => auth()->user()->name . ' logged their daily standup.',
+                'type' => 'info'
+            ]);
         }
 
-        return back()->with('success', 'Daily standup logged!');
+        $standup->load('user'); 
+
+        broadcast(new \App\Events\StandupCreated($standup))->toOthers();
+
+        return response()->json([
+            'standup' => $standup,
+            'message' => 'Daily standup logged!'
+        ]);
     }
 }

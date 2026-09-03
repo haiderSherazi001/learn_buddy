@@ -23,7 +23,8 @@ class ResourceController extends Controller
         }
 
         // 3. Save it
-        Resource::create([
+        // ⚡ FIX: Added "$resource = " right here!
+        $resource = Resource::create([
             'user_id' => auth()->id(),
             'room_id' => $room->id,
             'title' => $request->title,
@@ -36,6 +37,12 @@ class ResourceController extends Controller
             'type' => 'info'
         ]);
 
-        return back()->with('success', 'Resource added to the stash!');
+        // Now this will work perfectly!
+        $resource->load('user');
+        broadcast(new \App\Events\ResourceAdded($resource))->toOthers();
+
+        return response()->json([
+            'resource' => $resource
+        ]);
     }
 }

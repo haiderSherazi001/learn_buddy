@@ -21,7 +21,7 @@ class LobbyController extends Controller
 
         $activeQueue = WaitingQueue::where('user_id', $user->id)->first();
 
-        $myRooms = $user->rooms()->orderBy('created_at', 'desc')->get();
+        $myRooms = $user->rooms()->with('users')->orderBy('created_at', 'desc')->get();
 
         return view('lobby.index', compact('popularTopics', 'activeQueue', 'myRooms'));
     }

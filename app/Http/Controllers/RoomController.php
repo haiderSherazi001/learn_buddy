@@ -6,6 +6,8 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\Room;
 use App\Models\RoomEvent;
+use App\Events\RoomUpdated;
+use App\Events\CohortMembersUpdated;
 
 class RoomController extends Controller
 {
@@ -17,7 +19,6 @@ class RoomController extends Controller
             abort(403, 'You do not have permission to access this room.');
         }
 
-        // We load the users, plus the commitments/standups (newest first) and the user who wrote them
         $room->load([
             'users', 
             'commitments' => fn($query) => $query->orderBy('is_completed', 'asc')->latest(),
@@ -39,25 +40,25 @@ class RoomController extends Controller
     {
         $user = auth()->user();
 
-        // 1. Remove the user from the room
         $room->users()->detach($user->id);
+        $room->touch(); 
 
-        // 2. Generate the System Notification
         RoomEvent::create([
             'room_id' => $room->id,
             'message' => $user->name . ' has left the cohort.',
             'type' => 'leave'
         ]);
 
-        // 3. (Optional but good) If the room is now completely empty, we can just delete it
         if ($room->users()->count() === 0) {
             $room->delete();
+        } else {
+            broadcast(new RoomUpdated($room));
+            broadcast(new CohortMembersUpdated($room));
         }
 
         return redirect()->route('lobby')->with('success', 'You have left the room.');
     }
 
-    // Store a new custom room
     public function store(Request $request)
     {
         $request->validate([
@@ -71,32 +72,45 @@ class RoomController extends Controller
             'status' => 'active',
             'creator_id' => auth()->id(),
             'max_capacity' => $request->max_capacity,
-            'invite_code' => Str::random(8), // Generates something like 'aB3dE9xQ'
+            'invite_code' => Str::random(8),
         ]);
 
-        // Attach the creator to the room
         $room->users()->attach(auth()->id());
+
+        RoomEvent::create([
+            'room_id' => $room->id,
+            'message' => auth()->user()->name . ' joined the cohort!',
+            'type' => 'info'
+        ]);
+
+        broadcast(new RoomUpdated($room));
 
         return redirect()->route('rooms.show', $room->id)->with('success', 'Custom room created! Share your invite link.');
     }
 
-    // Process the invite link
     public function joinViaInvite($invite_code)
     {
         $room = Room::where('invite_code', $invite_code)->firstOrFail();
 
-        // If they are already in the room, just redirect them there
         if ($room->users->contains(auth()->id())) {
             return redirect()->route('rooms.show', $room->id);
         }
 
-        // Check if the room is full
         if ($room->users()->count() >= $room->max_capacity) {
             return redirect()->route('lobby')->with('error', 'Sorry, this custom room is already full!');
         }
 
-        // Welcome to the room!
         $room->users()->attach(auth()->id());
+        $room->touch();
+
+        RoomEvent::create([
+            'room_id' => $room->id,
+            'message' => auth()->user()->name . ' joined the cohort!',
+            'type' => 'info'
+        ]);
+
+        broadcast(new RoomUpdated($room));
+        broadcast(new CohortMembersUpdated($room));
 
         return redirect()->route('rooms.show', $room->id)->with('success', 'You successfully joined the custom room!');
     }
