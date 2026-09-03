@@ -10,3 +10,7 @@ Broadcast::channel('room.{roomId}', function (User $user, $roomId) {
 Broadcast::channel('user.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
+
+Broadcast::channel('lobby', function ($user) {
+    return true; 
+});
