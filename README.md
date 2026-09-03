@@ -52,7 +52,7 @@ Background activity automatically triggers animated notification badges on hidde
 
 ### Backend
 
-* Laravel 11
+* Laravel 12
 * PHP 8.x
 * MySQL or PostgreSQL
 
