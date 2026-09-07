@@ -9,12 +9,26 @@ class LobbyController extends Controller
 {
     public function index()
     {
+        // ⚡ Expanded topic list!
         $popularTopics = [
-            'Laravel',
-            'React',
-            'Python',
+            'HTML & CSS',
             'JavaScript',
-            'Vue.js'
+            'TypeScript',
+            'React',
+            'Vue.js',
+            'Node.js',
+            'PHP',
+            'Laravel',
+            'Python',
+            'Java',
+            'C++ / C#',
+            'SQL / Databases',
+            'Data Science',
+            'Machine Learning',
+            'AWS / Cloud',
+            'Docker / DevOps',
+            'UI/UX Design',
+            'General Study'
         ];
 
         $user = auth()->user();

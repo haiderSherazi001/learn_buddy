@@ -52,13 +52,20 @@
             @endif
 
             <!-- ACTION SECTION: Start a New Session -->
+            <style>
+                .scrollable-panel::-webkit-scrollbar { width: 6px; }
+                .scrollable-panel::-webkit-scrollbar-track { background: transparent; }
+                .scrollable-panel::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
+                .scrollable-panel:hover::-webkit-scrollbar-thumb { background-color: #94a3b8; }
+            </style>
+
             <div class="mt-12 pt-10 border-t border-gray-200">
                 <h2 class="text-xl font-extrabold text-gray-900 mb-6">Start a New Session</h2>
                 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
                     
                     <!-- LEFT: Matchmaking Queue -->
-                    <div class="bg-white rounded-2xl border border-gray-200 p-6 sm:p-8 shadow-sm">
+                    <div class="bg-white rounded-2xl border border-gray-200 p-6 sm:p-8 shadow-sm flex flex-col h-full">
                         <div class="flex items-center gap-3 mb-2">
                             <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
@@ -67,28 +74,38 @@
                         </div>
                         <p class="text-sm text-gray-500 mb-6 ml-13">Pick a topic to instantly join a queue. We'll generate a room the moment we find a partner.</p>
                         
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <!-- ⚡ NEW: Upgraded Mini-Cards for Topics -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[360px] overflow-y-auto scrollable-panel pr-2 pb-2">
                             @foreach($popularTopics as $topic)
-                            <form action="{{ route('queue.join') }}" method="POST" class="flex flex-col bg-gray-50 rounded-xl border border-gray-100 hover:border-indigo-300 hover:shadow-md transition overflow-hidden group">
+                            <form action="{{ route('queue.join') }}" method="POST" class="bg-white rounded-xl border border-gray-200 hover:border-indigo-400 hover:ring-1 hover:ring-indigo-400 hover:shadow-md transition p-3.5 flex flex-col justify-between gap-3 group">
                                 @csrf
                                 <input type="hidden" name="topic" value="{{ $topic }}">
                                 
-                                <button type="submit" class="px-4 py-3 bg-white text-gray-800 font-bold text-left group-hover:text-indigo-700 transition border-b border-gray-100 flex justify-between items-center">
+                                <!-- Topic Title (Now has room to wrap naturally!) -->
+                                <div class="font-bold text-gray-800 text-sm leading-snug group-hover:text-indigo-700 transition">
                                     {{ $topic }}
-                                    <span class="text-indigo-400 opacity-0 group-hover:opacity-100 transition">&rarr;</span>
-                                </button>
+                                </div>
                                 
-                                <select name="size_preference" class="text-xs bg-transparent border-none text-gray-500 focus:ring-0 py-2 cursor-pointer outline-none w-full font-medium">
-                                    <option value="duo">1-on-1 Buddy</option>
-                                    <option value="group">Group (Max 4)</option>
-                                </select>
+                                <!-- Controls: Dropdown + Submit Button -->
+                                <div class="flex items-center justify-between bg-gray-50 rounded-lg p-1 border border-gray-100">
+                                    <!-- Smaller, cleaner select -->
+                                    <select name="size_preference" class="text-xs bg-transparent border-none text-gray-600 focus:ring-0 py-1.5 pl-2 pr-6 cursor-pointer outline-none w-full font-medium">
+                                        <option value="duo">1-on-1</option>
+                                        <option value="group">Group (4)</option>
+                                    </select>
+                                    
+                                    <!-- Dedicated Action Button -->
+                                    <button type="submit" class="bg-indigo-600 text-white p-1.5 rounded-md hover:bg-indigo-700 transition shadow-sm flex-shrink-0 ml-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                                    </button>
+                                </div>
                             </form>
                             @endforeach
                         </div>
                     </div>
 
                     <!-- RIGHT: Custom Room -->
-                    <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl border border-indigo-100 p-6 sm:p-8 shadow-sm flex flex-col justify-between">
+                    <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl border border-indigo-100 p-6 sm:p-8 shadow-sm flex flex-col justify-between h-full">
                         <div>
                             <div class="flex items-center gap-3 mb-2">
                                 <div class="w-10 h-10 bg-indigo-100 text-indigo-700 rounded-lg flex items-center justify-center">
