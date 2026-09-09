@@ -25,6 +25,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/rooms/custom', [RoomController::class, 'store'])->name('rooms.store');
     Route::get('/join/{invite_code}', [RoomController::class, 'joinViaInvite'])->name('rooms.join');
     Route::post('/rooms/{room}/messages', [MessageController::class, 'store'])->name('messages.store');
+    Route::get('/users/{user}/modal', function (\App\Models\User $user) {
+    return view('components.room.profile-modal', compact('user'));
+    });
+    Route::post('/rooms/{room}/media', [App\Http\Controllers\RoomController::class, 'uploadMedia'])->name('rooms.media');
 });
 Route::get('/lobby', [LobbyController::class, 'index'])
     ->middleware(['auth', 'verified'])

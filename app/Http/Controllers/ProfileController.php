@@ -24,17 +24,42 @@ class ProfileController extends Controller
     /**
      * Update the user's profile information.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(\App\Http\Requests\ProfileUpdateRequest $request): \Illuminate\Http\RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user(); 
+        $oldAvatar = $user->avatar; 
+        
+        $user->fill($request->validated());
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
         }
 
-        $request->user()->save();
+        // 1. Handle Avatar Removal
+        if ($request->boolean('remove_avatar')) {
+            if ($oldAvatar) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($oldAvatar);
+            }
+            $user->avatar = null; // Clear from database
+        } 
+        // 2. Handle New Avatar Upload
+        elseif ($request->hasFile('avatar')) {
+            if ($oldAvatar) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($oldAvatar);
+            }
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+            $user->avatar = $avatarPath;
+        }
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        $user->save();
+
+        // ⚡ 3. REAL-TIME MAGIC: Tell all rooms this user is in to update their UIs!
+        foreach ($user->rooms as $room) {
+            broadcast(new \App\Events\CohortMembersUpdated($room));
+            broadcast(new \App\Events\RoomUpdated($room)); // Updates the Lobby Cards too!
+        }
+
+        return \Illuminate\Support\Facades\Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
     /**
