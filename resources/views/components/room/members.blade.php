@@ -1,6 +1,5 @@
 @props(['room'])
 
-<!-- ⚡ The essential wrapper ID for real-time JavaScript updates -->
 <div id="cohort-members-wrapper">
     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border-t-4 border-emerald-400 flex flex-col h-[600px]">
         
@@ -13,50 +12,28 @@
             </span>
         </div>
 
-        <!-- The Member List -->
         <div id="members-list" class="flex-1 p-3 overflow-y-auto scrollable-panel bg-white space-y-3">
             @foreach($room->users as $user)
-                <div onclick="toggleProfile('{{ $user->id }}')" class="bg-gray-50 border border-gray-100 rounded-xl p-3 hover:border-emerald-300 hover:shadow-md transition cursor-pointer group">
-                    
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            @if($user->avatar)
-                                <img src="{{ asset('storage/' . $user->avatar) }}" alt="{{ $user->name }}" class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm">
-                            @else
-                                <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center border-2 border-white shadow-sm">
-                                    {{ strtoupper(substr($user->name, 0, 1)) }}
-                                </div>
-                            @endif
-                            
-                            <div>
-                                <p class="text-sm font-bold text-gray-900 group-hover:text-emerald-700 transition leading-tight">{{ $user->name }}</p>
-                                <!-- Brought back your Creator Badge! -->
-                                @if($user->id === $room->creator_id)
-                                    <p class="text-[10px] text-gray-400 uppercase tracking-wide font-semibold mt-0.5">Creator</p>
-                                @endif
+                <div onclick="openProfileModal('{{ $user->id }}')" class="bg-gray-50 border border-gray-100 rounded-xl p-3 hover:border-emerald-300 hover:shadow-md transition cursor-pointer group flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        @if($user->avatar)
+                            <img src="{{ asset('storage/' . $user->avatar) }}" alt="{{ $user->name }}" class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm">
+                        @else
+                            <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center border-2 border-white shadow-sm">
+                                {{ strtoupper(substr($user->name, 0, 1)) }}
                             </div>
-                        </div>
+                        @endif
                         
-                        <!-- Animated Arrow Icon -->
-                        <div class="text-gray-400 group-hover:text-emerald-500 transition-colors">
-                            <svg id="chevron-{{ $user->id }}" class="w-5 h-5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                        <div>
+                            <p class="text-sm font-bold text-gray-900 group-hover:text-emerald-700 transition leading-tight">{{ $user->name }}</p>
+                            @if($user->id === $room->creator_id)
+                                <p class="text-[10px] text-gray-400 uppercase tracking-wide font-semibold mt-0.5">Creator</p>
+                            @endif
                         </div>
                     </div>
-
-                    <!-- Hidden Accordion Details -->
-                    <div id="profile-{{ $user->id }}" class="hidden mt-3 pt-3 border-t border-gray-200 text-xs text-gray-600 space-y-2 animate-fade-in">
-                        @if($user->education)
-                            <p><span class="font-bold text-gray-800">Education:</span> {{ $user->education }}</p>
-                        @endif
-                        @if($user->skills)
-                            <p><span class="font-bold text-gray-800">Skills:</span> {{ $user->skills }}</p>
-                        @endif
-                        @if($user->email)
-                            <p><span class="font-bold text-gray-800">Email:</span> {{ $user->email }}</p>
-                        @endif
-                        @if($user->bio)
-                            <p><span class="font-bold text-gray-800">Bio:</span> {{ $user->bio }}</p>
-                        @endif
+                    
+                    <div class="text-gray-300 group-hover:text-emerald-500 transition-colors bg-white rounded-full p-1 shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                     </div>
                 </div>
             @endforeach
@@ -64,19 +41,28 @@
     </div>
 
     <script>
-        function toggleProfile(userId) {
-            const detailsDiv = document.getElementById('profile-' + userId);
-            const chevronIcon = document.getElementById('chevron-' + userId); 
-
-            if (detailsDiv && chevronIcon) {
-                if (detailsDiv.classList.contains('hidden')) {
-                    detailsDiv.classList.remove('hidden');
-                    chevronIcon.classList.add('rotate-180'); 
-                } else {
-                    detailsDiv.classList.add('hidden');
-                    chevronIcon.classList.remove('rotate-180'); 
-                }
+        window.openProfileModal = async function(userId) {
+            if (document.getElementById('modal-' + userId)) {
+                document.getElementById('modal-' + userId).classList.remove('hidden');
+                return;
             }
-        }
+
+            try {
+                const response = await fetch(`/users/${userId}/modal`);
+                if (response.ok) {
+                    const html = await response.text();
+                    document.body.insertAdjacentHTML('beforeend', html);
+                }
+            } catch (error) {
+                console.error("Failed to load profile:", error);
+            }
+        };
+
+        window.closeProfileModal = function(userId) {
+            const modal = document.getElementById('modal-' + userId);
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        };
     </script>
 </div>
