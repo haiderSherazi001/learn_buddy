@@ -39,7 +39,7 @@
                 </div>
             @endif
 
-            <!-- MY ACTIVE ROOMS SECTION (Using your upgraded cards!) -->
+            <!-- MY ACTIVE ROOMS SECTION -->
             @if($myRooms->count() > 0)
                 <div>
                     <h2 class="text-xl font-extrabold text-gray-900 mb-5">My Active Cohorts</h2>
@@ -74,27 +74,22 @@
                         </div>
                         <p class="text-sm text-gray-500 mb-6 ml-13">Pick a topic to instantly join a queue. We'll generate a room the moment we find a partner.</p>
                         
-                        <!-- ⚡ NEW: Upgraded Mini-Cards for Topics -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[360px] overflow-y-auto scrollable-panel pr-2 pb-2">
                             @foreach($popularTopics as $topic)
                             <form action="{{ route('queue.join') }}" method="POST" class="bg-white rounded-xl border border-gray-200 hover:border-indigo-400 hover:ring-1 hover:ring-indigo-400 hover:shadow-md transition p-3.5 flex flex-col justify-between gap-3 group">
                                 @csrf
                                 <input type="hidden" name="topic" value="{{ $topic }}">
                                 
-                                <!-- Topic Title (Now has room to wrap naturally!) -->
                                 <div class="font-bold text-gray-800 text-sm leading-snug group-hover:text-indigo-700 transition">
                                     {{ $topic }}
                                 </div>
                                 
                                 <!-- Controls: Dropdown + Submit Button -->
                                 <div class="flex items-center justify-between bg-gray-50 rounded-lg p-1 border border-gray-100">
-                                    <!-- Smaller, cleaner select -->
                                     <select name="size_preference" class="text-xs bg-transparent border-none text-gray-600 focus:ring-0 py-1.5 pl-2 pr-6 cursor-pointer outline-none w-full font-medium">
                                         <option value="duo">1-on-1</option>
                                         <option value="group">Group (4)</option>
                                     </select>
-                                    
-                                    <!-- Dedicated Action Button -->
                                     <button type="submit" class="bg-indigo-600 text-white p-1.5 rounded-md hover:bg-indigo-700 transition shadow-sm flex-shrink-0 ml-1">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
                                     </button>
@@ -105,35 +100,50 @@
                     </div>
 
                     <!-- RIGHT: Custom Room -->
-                    <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl border border-indigo-100 p-6 sm:p-8 shadow-sm flex flex-col justify-between h-full">
-                        <div>
+                    <div class="bg-white rounded-2xl border border-gray-200 p-6 sm:p-8 shadow-sm flex flex-col justify-between h-full relative overflow-hidden group">
+                        
+                        <!-- ⚡ Decorative modern blur effect in the background -->
+                        <div class="absolute -top-24 -right-24 w-48 h-48 bg-purple-100 rounded-full blur-3xl opacity-50 group-hover:opacity-80 transition duration-700 pointer-events-none"></div>
+                        
+                        <div class="relative z-10">
                             <div class="flex items-center gap-3 mb-2">
-                                <div class="w-10 h-10 bg-indigo-100 text-indigo-700 rounded-lg flex items-center justify-center">
+                                <div class="w-10 h-10 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
                                 </div>
                                 <h3 class="text-xl font-bold text-gray-900">Create Custom Room</h3>
                             </div>
-                            <p class="text-sm text-gray-600 mb-6">Studying for a specific exam? Create a private room and generate an invite link for your friends.</p>
+                            <p class="text-sm text-gray-500 mb-8 ml-13">Studying for a specific exam? Create a private room and generate an invite link for your friends.</p>
                         </div>
                         
-                        <form action="{{ route('rooms.store') }}" method="POST" class="bg-white p-5 rounded-xl border border-white/50 shadow-sm space-y-4">
+                        <form action="{{ route('rooms.store') }}" method="POST" class="flex flex-col gap-5 relative z-10 mt-auto">
                             @csrf
+                            
+                            <!-- Room Name Input -->
                             <div>
-                                <label class="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Room Name</label>
-                                <input type="text" name="title" placeholder="e.g., University Finals Prep" required class="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                <label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">Cohort Name</label>
+                                <input type="text" name="title" placeholder="e.g., University Finals Prep" required 
+                                    class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition outline-none shadow-inner">
                             </div>
                             
-                            <div class="flex gap-4">
-                                <div class="w-1/3">
-                                    <label class="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Size</label>
-                                    <input type="number" name="max_capacity" value="4" min="2" max="10" required class="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                </div>
-                                <div class="w-2/3 flex items-end">
-                                    <button type="submit" class="w-full px-4 py-2 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 transition shadow-sm h-[42px]">
-                                        Create Room
-                                    </button>
-                                </div>
+                            <!-- Size Select (Better UX than a number input) -->
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">Capacity</label>
+                                <select name="max_capacity" required 
+                                    class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 focus:bg-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition outline-none cursor-pointer shadow-inner">
+                                    <option value="2">2 Members (Duo)</option>
+                                    <option value="3">3 Members</option>
+                                    <option value="4" selected>4 Members (Standard Group)</option>
+                                    <option value="5">5 Members</option>
+                                    <option value="6">6 Members</option>
+                                    <option value="10">10 Members (Max)</option>
+                                </select>
                             </div>
+                            
+                            <!-- Submit Button -->
+                            <button type="submit" class="w-full mt-2 py-3.5 bg-gray-900 text-white font-bold rounded-xl hover:bg-gray-800 hover:shadow-lg transition flex justify-center items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                                Launch Private Room
+                            </button>
                         </form>
                     </div>
 
@@ -157,6 +167,14 @@
             const oldCard = document.getElementById(`room-card-${event.roomId}`);
             if (oldCard) {
                 oldCard.outerHTML = event.html;
+                
+                const csrfMetaTag = document.querySelector('meta[name="csrf-token"]');
+                if (csrfMetaTag) {
+                    const csrfToken = csrfMetaTag.content;
+                    document.querySelectorAll('input[name="_token"]').forEach(input => {
+                        input.value = csrfToken;
+                    });
+                }
             }
         });
     </script>
