@@ -18,7 +18,7 @@
         @method('patch')
 
         <!-- Current Avatar Preview & Upload -->
-        <div class="flex items-center gap-4">
+        <div class="flex items-start gap-4">
             @if($user->avatar)
                 <img src="{{ asset('storage/' . $user->avatar) }}" alt="Avatar" class="w-16 h-16 rounded-full object-cover border-2 border-emerald-400 shadow-sm">
             @else
@@ -31,6 +31,15 @@
                 <x-input-label for="avatar" :value="__('Change Profile Picture')" />
                 <input id="avatar" type="file" name="avatar" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer" />
                 <x-input-error class="mt-2" :messages="$errors->get('avatar')" />
+                
+                @if($user->avatar)
+                    <div class="mt-3">
+                        <label class="inline-flex items-center cursor-pointer group">
+                            <input type="checkbox" name="remove_avatar" value="1" class="rounded border-gray-300 text-red-600 shadow-sm focus:ring-red-500 cursor-pointer">
+                            <span class="ml-2 text-sm text-red-600 font-medium group-hover:text-red-700 transition">Remove current picture</span>
+                        </label>
+                    </div>
+                @endif
             </div>
         </div>
 

@@ -36,12 +36,24 @@
             <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Buddies ({{ $room->users->count() }}/{{ $room->max_capacity ?? '∞' }})
             </div>
-            <div class="flex -space-x-2">
-                @foreach($room->users->take(4) as $member)
-                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 border-2 border-white flex items-center justify-center text-indigo-700 text-xs font-bold shadow-sm" title="{{ $member->name }}">
-                        {{ strtoupper(substr($member->name, 0, 1)) }}
-                    </div>
+            <!-- ⚡ BEAUTIFUL OVERLAPPING AVATARS (FACEPILE) -->
+            <div class="flex -space-x-2 overflow-hidden mt-3 mb-4">
+                @foreach($room->users->take(4) as $roomUser)
+                    @if($roomUser->avatar)
+                        <img class="inline-block h-8 w-8 rounded-full ring-2 ring-white object-cover" src="{{ asset('storage/' . $roomUser->avatar) }}" alt="{{ $roomUser->name }}"/>
+                    @else
+                        <div class="inline-flex h-8 w-8 rounded-full ring-2 ring-white bg-emerald-100 text-emerald-700 items-center justify-center text-xs font-bold shadow-sm">
+                            {{ strtoupper(substr($roomUser->name, 0, 1)) }}
+                        </div>
+                    @endif
                 @endforeach
+                
+                <!-- Show a "+X" bubble if there are more than 4 people -->
+                @if($room->users->count() > 4)
+                    <div class="inline-flex h-8 w-8 rounded-full ring-2 ring-white bg-gray-50 text-gray-500 items-center justify-center text-xs font-bold shadow-sm">
+                        +{{ $room->users->count() - 4 }}
+                    </div>
+                @endif
             </div>
         </div>
 
