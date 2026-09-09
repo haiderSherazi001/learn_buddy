@@ -114,4 +114,28 @@ class RoomController extends Controller
 
         return redirect()->route('rooms.show', $room->id)->with('success', 'You successfully joined the custom room!');
     }
+    
+    public function uploadMedia(Request $request, Room $room)
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'max:20480'], 
+            'type' => ['required', 'in:image,audio,document']
+        ]);
+
+        $path = $request->file('file')->store('chat', 'public');
+
+        // Create a message instead of an event!
+        $message = $room->messages()->create([
+            'user_id' => auth()->id(),
+            'body' => $path,
+            'type' => $request->type, 
+        ]);
+
+        broadcast(new \App\Events\MessageSent($message, auth()->user(), $room->id));
+
+        return response()->json([
+            'message' => $message,
+            'user' => auth()->user()
+        ]);
+    }
 }

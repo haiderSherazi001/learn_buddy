@@ -28,6 +28,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/users/{user}/modal', function (\App\Models\User $user) {
     return view('components.room.profile-modal', compact('user'));
     });
+    Route::post('/rooms/{room}/media', [App\Http\Controllers\RoomController::class, 'uploadMedia'])->name('rooms.media');
 });
 Route::get('/lobby', [LobbyController::class, 'index'])
     ->middleware(['auth', 'verified'])

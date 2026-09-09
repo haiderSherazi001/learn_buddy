@@ -89,26 +89,21 @@
         </div>
     </div>
 
-    <!-- ⚡ Tiny Script to handle the 4 Tabs -->
     <script>
         function switchTab(tabName) {
-            // 1. Hide all tab contents
             document.getElementById('tab-chat').classList.add('hidden');
             document.getElementById('tab-members').classList.add('hidden');
             document.getElementById('tab-resources').classList.add('hidden');
-            document.getElementById('tab-activity').classList.add('hidden'); // ⚡ NEW
+            document.getElementById('tab-activity').classList.add('hidden');
 
-            // 2. Reset all buttons to gray/inactive style
-            const btns = ['chat', 'members', 'resources', 'activity']; // ⚡ NEW
+            const btns = ['chat', 'members', 'resources', 'activity']; 
             btns.forEach(btn => {
                 const el = document.getElementById('btn-' + btn);
                 el.className = "flex-1 py-1.5 px-2 rounded-lg text-xs sm:text-sm font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition";
             });
 
-            // 3. Show the selected tab content
             document.getElementById('tab-' + tabName).classList.remove('hidden');
 
-            // 4. Highlight the active button
             const activeBtn = document.getElementById('btn-' + tabName);
             activeBtn.className = "flex-1 py-1.5 px-2 rounded-lg text-xs sm:text-sm font-bold bg-white text-indigo-600 shadow-sm transition";
             
