@@ -59,7 +59,6 @@
         @endforelse
     </div>
 
-    <!-- MEDIA PREVIEW BOX (Hidden by default) -->
     <div id="media-preview-container" class="hidden absolute bottom-16 left-0 right-0 bg-white border-t border-gray-200 p-3 shadow-lg-up z-20">
         <div class="flex items-center justify-between bg-gray-50 p-2 rounded-lg border border-gray-200">
             <div class="flex items-center gap-3 overflow-hidden">

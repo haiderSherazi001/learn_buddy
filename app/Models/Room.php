@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Room extends Model
 {
@@ -12,6 +13,26 @@ class Room extends Model
     protected $fillable = [
         'title', 'type', 'status', 'creator_id', 'streak_count', 'last_streak_date', 'max_capacity', 'invite_code'
     ];
+
+    protected static function booted()
+    {
+        // This event fires right before the room is actually deleted from the database
+        static::deleting(function ($room) {
+            
+            // 1. Fetch all messages in this room that are media files
+            $mediaMessages = $room->messages()
+                                  ->whereIn('type', ['image', 'audio', 'document'])
+                                  ->get();
+            
+            // 2. Delete the physical files from the server
+            foreach ($mediaMessages as $message) {
+                if ($message->body) {
+                    Storage::disk('public')->delete($message->body);
+                }
+            }
+        });
+    }
+
     public function users()
     {
         return $this->belongsToMany(User::class);

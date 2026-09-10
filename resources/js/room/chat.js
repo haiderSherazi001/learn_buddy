@@ -33,18 +33,58 @@ export function initChatAndActivity(currentUserId, roomChannel, roomId) {
     roomChannel.listen("MessageSent", (event) => {
         if (event.user.id !== currentUserId) {
             appendMessage(event.message, event.user);
+
+            const chatTabContent = document.getElementById("tab-chat");
+            if (chatTabContent && chatTabContent.classList.contains("hidden")) {
+                const chatBadge = document.getElementById("chat-badge");
+                if (chatBadge) chatBadge.classList.remove("hidden");
+            }
         }
     });
 
     roomChannel.listen("RoomEventBroadcast", (e) => {
         if (!activityLog) return;
         const logData = e.event;
+
+        const currentUserName = document
+            .getElementById("room-data")
+            .dataset.userName.trim();
+        let messageText = logData.message.trim();
+        let isMe = false;
+
+        // ⚡ CHANGE: Check if the message CONTAINS your name anywhere, ignoring upper/lowercase
+        if (messageText.toLowerCase().includes(currentUserName.toLowerCase())) {
+            isMe = true;
+
+            // Regex to find your name anywhere in the string and replace it with "You"
+            const nameRegex = new RegExp(currentUserName, "i");
+            messageText = messageText.replace(nameRegex, "You");
+
+            // Replace "their" with "your"
+            messageText = messageText.replace(/\btheir\b/gi, "your");
+
+            // (Optional grammar fix in case it says "sherazi has" -> "You have")
+            messageText = messageText.replace(/\bhas\b/gi, "have");
+        }
+
         const colorClass =
             logData.type === "leave"
                 ? "border-red-400 text-red-700 bg-red-50"
                 : "border-blue-400 text-blue-700 bg-blue-50";
-        const html = `<li class="text-sm border-l-2 pl-3 py-1 ${colorClass} rounded-r animate-fade-in"><span class="block font-medium">${logData.message}</span><span class="text-xs opacity-75">Just now</span></li>`;
+        const html = `<li class="text-sm border-l-2 pl-3 py-1 ${colorClass} rounded-r animate-fade-in"><span class="block font-medium">${messageText}</span><span class="text-xs opacity-75">Just now</span></li>`;
         activityLog.insertAdjacentHTML("afterbegin", html);
+
+        // ONLY SHOW THE DOT IF SOMEONE ELSE DID IT!
+        if (!isMe) {
+            const activityTabContent = document.getElementById("tab-activity");
+            if (
+                activityTabContent &&
+                activityTabContent.classList.contains("hidden")
+            ) {
+                const activityBadge = document.getElementById("activity-badge");
+                if (activityBadge) activityBadge.classList.remove("hidden");
+            }
+        }
     });
 
     // --- 1. FILE SELECTION ---

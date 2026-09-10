@@ -1,7 +1,7 @@
 <x-app-layout>
     @vite(['resources/js/room.js'])
     <x-slot name="header">
-        <div id="room-data" data-room-id="{{ $room->id }}" data-user-id="{{ auth()->id() }}" class="hidden"></div>
+        <div id="room-data" data-room-id="{{ $room->id }}" data-user-id="{{ auth()->id() }}" data-user-name="{{ auth()->user()->name }}" class="hidden"></div>
         <x-room.header :room="$room" />
     </x-slot>
 
@@ -48,16 +48,20 @@
 
                     <!-- Sidebar Navigation Tabs -->
                     <div class="flex space-x-1 bg-gray-200/60 p-1 rounded-xl mb-4 shadow-inner">
-                        <button onclick="switchTab('chat')" id="btn-chat" class="flex-1 py-1.5 px-2 rounded-lg text-xs sm:text-sm font-bold bg-white text-indigo-600 shadow-sm transition">
+                        <button onclick="switchTab('chat')" id="btn-chat" class="relative flex-1 py-1.5 px-2 rounded-lg text-xs sm:text-sm font-bold bg-white text-indigo-600 shadow-sm transition">
                             💬 Chat
+                            <span id="chat-badge" class="hidden absolute top-1 right-2 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full animate-bounce"></span>
                         </button>
+                        
                         <button onclick="switchTab('members')" id="btn-members" class="flex-1 py-1.5 px-2 rounded-lg text-xs sm:text-sm font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition">
                             👥 Members
                         </button>
+                        
                         <button onclick="switchTab('resources')" id="btn-resources" class="flex-1 py-1.5 px-2 rounded-lg text-xs sm:text-sm font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition">
                             📚 Stash
                         </button>
-                        <button onclick="switchTab('activity')" id="btn-activity" class="flex-1 py-1.5 px-2 rounded-lg text-xs sm:text-sm font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition">
+                        
+                        <button onclick="switchTab('activity')" id="btn-activity" class="relative flex-1 py-1.5 px-2 rounded-lg text-xs sm:text-sm font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition">
                             🔔 Log
                             <span id="activity-badge" class="hidden absolute top-1 right-2 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full animate-bounce"></span>
                         </button>
@@ -91,24 +95,35 @@
 
     <script>
         function switchTab(tabName) {
+            // 1. Hide all tab content
             document.getElementById('tab-chat').classList.add('hidden');
             document.getElementById('tab-members').classList.add('hidden');
             document.getElementById('tab-resources').classList.add('hidden');
             document.getElementById('tab-activity').classList.add('hidden');
-
+    
+            // 2. Reset all buttons (⚡ CRITICAL: 'relative' is kept here so badges don't fly away!)
             const btns = ['chat', 'members', 'resources', 'activity']; 
             btns.forEach(btn => {
                 const el = document.getElementById('btn-' + btn);
-                el.className = "flex-1 py-1.5 px-2 rounded-lg text-xs sm:text-sm font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition";
+                el.className = "relative flex-1 py-1.5 px-2 rounded-lg text-xs sm:text-sm font-semibold text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition";
             });
-
+    
+            // 3. Show the target tab
             document.getElementById('tab-' + tabName).classList.remove('hidden');
-
+    
+            // 4. Highlight the active button (⚡ 'relative' is kept here too!)
             const activeBtn = document.getElementById('btn-' + tabName);
-            activeBtn.className = "flex-1 py-1.5 px-2 rounded-lg text-xs sm:text-sm font-bold bg-white text-indigo-600 shadow-sm transition";
+            activeBtn.className = "relative flex-1 py-1.5 px-2 rounded-lg text-xs sm:text-sm font-bold bg-white text-indigo-600 shadow-sm transition";
             
+            // 5. Hide the red dots when their tab is clicked
             if (tabName === 'activity') {
-                document.getElementById('activity-badge').classList.add('hidden');
+                const activityBadge = document.getElementById('activity-badge');
+                if (activityBadge) activityBadge.classList.add('hidden');
+            }
+            
+            if (tabName === 'chat') {
+                const chatBadge = document.getElementById('chat-badge');
+                if (chatBadge) chatBadge.classList.add('hidden');
             }
         }
     </script>
