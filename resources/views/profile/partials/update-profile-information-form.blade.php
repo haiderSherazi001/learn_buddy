@@ -1,11 +1,10 @@
 <section>
-    <header>
-        <h2 class="text-lg font-medium text-gray-900">
+    <header class="border-b border-gray-100 pb-4 mb-6">
+        <h2 class="text-xl font-bold text-gray-900">
             {{ __('Profile Information') }}
         </h2>
-
-        <p class="mt-1 text-sm text-gray-600">
-            {{ __("Update your account's profile information and email address.") }}
+        <p class="mt-1 text-sm text-gray-500">
+            {{ __("Update your account's profile information, email address, and professional details.") }}
         </p>
     </header>
 
@@ -13,87 +12,70 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6" enctype="multipart/form-data">
+    <form method="post" action="{{ route('profile.update') }}" class="space-y-8">
         @csrf
         @method('patch')
 
-        <!-- Current Avatar Preview & Upload -->
-        <div class="flex items-start gap-4">
-            @if($user->avatar)
-                <img src="{{ asset('storage/' . $user->avatar) }}" alt="Avatar" class="w-16 h-16 rounded-full object-cover border-2 border-emerald-400 shadow-sm">
-            @else
-                <div class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center text-xl border-2 border-emerald-400 shadow-sm">
-                    {{ strtoupper(substr($user->name, 0, 1)) }}
-                </div>
-            @endif
-            
-            <div class="flex-1">
-                <x-input-label for="avatar" :value="__('Change Profile Picture')" />
-                <input id="avatar" type="file" name="avatar" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer" />
-                <x-input-error class="mt-2" :messages="$errors->get('avatar')" />
-                
-                @if($user->avatar)
-                    <div class="mt-3">
-                        <label class="inline-flex items-center cursor-pointer group">
-                            <input type="checkbox" name="remove_avatar" value="1" class="rounded border-gray-300 text-red-600 shadow-sm focus:ring-red-500 cursor-pointer">
-                            <span class="ml-2 text-sm text-red-600 font-medium group-hover:text-red-700 transition">Remove current picture</span>
-                        </label>
-                    </div>
-                @endif
+        <!-- 1. Basic Details (2-Column Grid) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div class="sm:col-span-2">
+                <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider mb-2">Basic Info</h3>
+            </div>
+
+            <div>
+                <x-input-label for="name" :value="__('Full Name')" />
+                <x-text-input id="name" name="name" type="text" class="mt-1 block w-full bg-gray-50 focus:bg-white transition-colors" :value="old('name', $user->name)" required autocomplete="name" />
+                <x-input-error class="mt-2" :messages="$errors->get('name')" />
+            </div>
+
+            <div>
+                <x-input-label for="email" :value="__('Email Address')" />
+                <x-text-input id="email" name="email" type="email" class="mt-1 block w-full bg-gray-50 focus:bg-white transition-colors" :value="old('email', $user->email)" required autocomplete="username" />
+                <x-input-error class="mt-2" :messages="$errors->get('email')" />
+            </div>
+
+            <div>
+                <x-input-label for="phone" :value="__('Phone Number')" />
+                <x-text-input id="phone" name="phone" type="text" class="mt-1 block w-full bg-gray-50 focus:bg-white transition-colors" :value="old('phone', $user->phone)" placeholder="+1 (555) 000-0000" />
+                <x-input-error class="mt-2" :messages="$errors->get('phone')" />
             </div>
         </div>
 
-        <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)" required autofocus autocomplete="name" />
-            <x-input-error class="mt-2" :messages="$errors->get('name')" />
+        <!-- 2. Professional Details (2-Column Grid) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6 border-t border-gray-100">
+            <div class="sm:col-span-2">
+                <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider mb-2">Professional Info</h3>
+            </div>
+
+            <div class="sm:col-span-2">
+                <x-input-label for="education" :value="__('Education & Qualifications')" />
+                <x-text-input id="education" name="education" type="text" class="mt-1 block w-full bg-gray-50 focus:bg-white transition-colors" :value="old('education', $user->education)" required placeholder="e.g. BS Computer Science" />
+                <x-input-error class="mt-2" :messages="$errors->get('education')" />
+            </div>
+
+            <div class="sm:col-span-2">
+                <x-input-label for="skills" :value="__('Core Skills (Comma separated)')" />
+                <x-text-input id="skills" name="skills" type="text" class="mt-1 block w-full bg-gray-50 focus:bg-white transition-colors" :value="old('skills', $user->skills)" required placeholder="e.g. Laravel, Vue, Tailwind" />
+                <x-input-error class="mt-2" :messages="$errors->get('skills')" />
+            </div>
+
+            <div class="sm:col-span-2">
+                <x-input-label for="bio" :value="__('Short Bio (Optional)')" />
+                <textarea id="bio" name="bio" rows="3" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg shadow-sm bg-gray-50 focus:bg-white transition-colors resize-none" placeholder="Tell us a little about yourself...">{{ old('bio', $user->bio) }}</textarea>
+                <x-input-error class="mt-2" :messages="$errors->get('bio')" />
+            </div>
         </div>
 
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required autocomplete="username" />
-            <x-input-error class="mt-2" :messages="$errors->get('email')" />
-        </div>
-
-        <!-- Phone -->
-        <div>
-            <x-input-label for="phone" :value="__('Phone Number')" />
-            <x-text-input id="phone" name="phone" type="text" class="mt-1 block w-full" :value="old('phone', $user->phone)" />
-            <x-input-error class="mt-2" :messages="$errors->get('phone')" />
-        </div>
-
-        <!-- Education -->
-        <div>
-            <x-input-label for="education" :value="__('Education & Qualifications')" />
-            <x-text-input id="education" name="education" type="text" class="mt-1 block w-full" :value="old('education', $user->education)" required />
-            <x-input-error class="mt-2" :messages="$errors->get('education')" />
-        </div>
-
-        <!-- Skills -->
-        <div>
-            <x-input-label for="skills" :value="__('Core Skills (Comma separated)')" />
-            <x-text-input id="skills" name="skills" type="text" class="mt-1 block w-full" :value="old('skills', $user->skills)" required />
-            <x-input-error class="mt-2" :messages="$errors->get('skills')" />
-        </div>
-
-        <!-- Bio -->
-        <div>
-            <x-input-label for="bio" :value="__('Short Bio (Optional)')" />
-            <textarea id="bio" name="bio" rows="3" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm block mt-1 w-full">{{ old('bio', $user->bio) }}</textarea>
-            <x-input-error class="mt-2" :messages="$errors->get('bio')" />
-        </div>
-
-        <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('Save Changes') }}</x-primary-button>
+        <!-- 3. Save Actions -->
+        <div class="flex items-center gap-4 pt-6 border-t border-gray-100">
+            <button type="submit" class="inline-flex items-center px-6 py-2.5 bg-indigo-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 shadow-sm">
+                {{ __('Save Changes') }}
+            </button>
 
             @if (session('status') === 'profile-updated')
-                <p
-                    x-data="{ show: true }"
-                    x-show="show"
-                    x-transition
-                    x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-gray-600"
-                >{{ __('Saved.') }}</p>
+                <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 3000)" class="text-sm font-medium text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
+                    <span class="mr-1">✓</span> {{ __('Saved successfully.') }}
+                </p>
             @endif
         </div>
     </form>
