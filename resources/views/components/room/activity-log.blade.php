@@ -17,16 +17,12 @@
             $messageText = trim($event->message);
             $userName = trim(auth()->user()->name);
             
-            // ⚡ CHANGE: If your name exists ANYWHERE in the string (case-insensitive)
             if (stripos($messageText, $userName) !== false) {
                 
-                // Replace your name with "You" anywhere it appears
                 $messageText = str_ireplace($userName, 'You', $messageText);
                 
-                // Replace "their" with "your"
                 $messageText = str_ireplace(' their ', ' your ', $messageText);
                 
-                // Grammar cleanup (optional)
                 $messageText = str_ireplace(' You has ', ' You have ', $messageText);
             }
             @endphp
